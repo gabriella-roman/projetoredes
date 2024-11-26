@@ -10,23 +10,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout do código do repositório
+    # Checkout o código do repositório
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    # Configuração do JDK e build do projeto
+    # Configuração do JDK
     - name: Set up JDK
       uses: actions/setup-java@v3
       with:
         java-version: 17
         distribution: temurin
 
+    # Entrar na pasta do projeto e rodar o Maven para build
     - name: Build with Maven
-      run: mvn clean package
+      run: |
+        cd projetoredes
+        mvn clean package
 
-    # Teste da aplicação
+    # Teste da aplicação na pasta projetoredes
     - name: Run Tests
-      run: mvn test
+      run: |
+        cd projetoredes
+        mvn test
 
   docker:
     runs-on: ubuntu-latest
@@ -47,7 +52,7 @@ jobs:
     # Build e push da imagem Docker
     - name: Build and Push Docker Image
       run: |
-        docker build -t <docker-username>/projetoredes:latest .
+        docker build -t <docker-username>/projetoredes:latest projetoredes/
         docker push <docker-username>/projetoredes:latest
 
   deploy:
@@ -55,7 +60,7 @@ jobs:
     needs: docker
 
     steps:
-    # Configuração para Deploy na EC2
+    # Deploy para EC2
     - name: Deploy to EC2
       run: |
         ssh -o StrictHostKeyChecking=no -i /path/to/your/private/key.pem ubuntu@<EC2_PUBLIC_IP> << 'EOF'
